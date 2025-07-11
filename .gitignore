@@ -1,0 +1,144 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc.py
+
+# Virtual environment
+venv/
+env/
+ENV/
+.env
+.env.*
+.virtualenv
+.virtualenv
+
+# Installation directories
+build/
+dist/
+*.egg-info/
+eggs/
+develop-eggs/
+
+# MyPy cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code settings
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Logs and databases
+*.log
+*.sqlite3
+*.sqlitedb
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+.pycoverage*
+
+# Docker
+__pycache__
+*.DS_Store
+env/
+*.env
+*.log
+*.sock
+*.db
+*.sqlite3
+
+# Node.js dependencies (if using frontend tools)
+node_modules/
+npm-debug.log*
+yarn.lock
+
+UniGAD/pretrained_models/
+UniGAD/datasets/
+
+GADAM/data
+
+# 模型权重文件
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.weights
+*.onnx
+
+# 训练日志和输出目录
+logs/
+runs/
+output/
+experiments/
+results/
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.env
+
+# 缓存 & 临时文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+
+# 构建产物
+build/
+dist/
+*.egg-info/
+*.so
+
+# IDE 配置文件
+.vscode/
+.idea/
+*.iml
+*.swp
+
+# 环境配置文件
+.env
+.env.local
+.env.*.local
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebook 自动生成的缓存
+profile_default/
+ipython_config.py
+
+# Docker 相关
+Dockerfile.*
+docker-compose.*
+
+
+.ipynb_checkpoints/
