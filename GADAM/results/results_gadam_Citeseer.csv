@@ -1,0 +1,2 @@
+Dataset,Seed,Timestamp,Local_Epochs,Local_LR,Global_Epochs,Global_LR,Embedding_Dim,k_anomaly_perc,k_normal_perc,AUROC,AUPRC,Recall_at_K,K_value,Total_Time_s
+Citeseer,717,2025-07-12 12:55:41,100,0.001,50,0.0005,64,0.05,0.3,0.9374,0.7029,0.6333,150,2.14

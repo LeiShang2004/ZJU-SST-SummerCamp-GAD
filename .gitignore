@@ -94,7 +94,7 @@ logs/
 runs/
 output/
 experiments/
-results/
+
 
 # 虚拟环境
 venv/

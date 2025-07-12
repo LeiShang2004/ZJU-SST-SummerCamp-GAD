@@ -1,0 +1,2 @@
+Dataset,Seed,Timestamp,Local_Epochs,Local_LR,Global_Epochs,Global_LR,Embedding_Dim,k_anomaly_perc,k_normal_perc,AUROC,AUPRC,Recall_at_K,K_value,Total_Time_s
+BlogCatalog,717,2025-07-12 12:56:38,2000,0.002,30,0.0004,64,0.05,0.3,0.8065,0.2966,0.3667,300,15.76

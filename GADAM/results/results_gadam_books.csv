@@ -1,0 +1,2 @@
+Dataset,Seed,Timestamp,Local_Epochs,Local_LR,Global_Epochs,Global_LR,Embedding_Dim,k_anomaly_perc,k_normal_perc,AUROC,AUPRC,Recall_at_K,K_value,Total_Time_s
+books,717,2025-07-12 12:56:45,100,0.001,5,1e-05,64,0.05,0.3,0.5184,0.0214,0.0000,28,1.57

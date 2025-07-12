@@ -1,0 +1,2 @@
+Dataset,Seed,Timestamp,Local_Epochs,Local_LR,Global_Epochs,Global_LR,Embedding_Dim,k_anomaly_perc,k_normal_perc,AUROC,AUPRC,Recall_at_K,K_value,Total_Time_s
+reddit,717,2025-07-12 12:57:03,100,0.0005,50,0.0005,64,0.05,0.3,0.5792,0.0463,0.0792,366,2.18
