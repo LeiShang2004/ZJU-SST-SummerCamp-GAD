@@ -92,7 +92,8 @@ def tfgad_detect(X, A, k_a, k_s, eta):
 
 if __name__ == '__main__':
     # 数据集的配置
-    # 论文只做了reddit
+    
+    # 论文只做了reddit zju
     configs = {
             # Reddit 论文参数，eta大重属性
             'reddit':    {'k_a': 10, 'k_s': 5,   'eta': 500, 'feature_key': 'feature', 'reported_auc': 0.6021, 'reported_auprc': 0.0423},
@@ -112,9 +113,8 @@ if __name__ == '__main__':
             'questions': {'k_a': 10, 'k_s': 50,  'eta': 10,  'feature_key': 'feature', 'reported_auc': None, 'reported_auprc': None},
             'tolokers':  {'k_a': 10, 'k_s': 50,  'eta': 10,  'feature_key': 'feature', 'reported_auc': None, 'reported_auprc': None},
         }
-    
-
     base_path = "../../datasets/"
+
     results_summary = []
     all_files_in_dir = [f for f in os.listdir(base_path) if os.path.isfile(os.path.join(base_path, f))]
 
@@ -183,7 +183,7 @@ if __name__ == '__main__':
             results_summary.append({"Dataset": dataset_name, "AUROC": "Error", "AUPRC": "Error", "Rec@K": "Error"})
 
     if results_summary:
-        csv_filename = "tfgad_results_summary.csv"
+        csv_filename = "results_zju.csv"
         fieldnames = ["Dataset", "AUROC", "AUPRC", "Rec@K", "K", "Time(s)", "k_a", "k_s", "eta"]
         
         with open(csv_filename, 'w', newline='') as csvfile:

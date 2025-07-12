@@ -21,6 +21,9 @@ from functools import partial
 
 from line_profiler import profile
 
+import pandas as pd
+
+
 NAME_MAP = {
     'n': "Node",
     'e': "Edge",
@@ -48,6 +51,55 @@ def log_loss(tags:str, loss_item_dicts):
             ), end='')
         print("")
 
+def save_results(results, save_file_name=None):
+    save_file_name = save_file_name.replace('/', '')
+    if not os.path.exists('../results/'):
+        os.mkdir('../results/')
+    results.transpose().to_excel('../results/{}.xlsx'.format(save_file_name))
+    print('save to file: {}'.format(save_file_name))
+
+def save_results_to_csv(results_dict, args):
+    """
+    将单次实验结果追加到以数据集命名的CSV文件中。
+    """
+    dataset_name = results_dict.get('Dataset', 'unknown_dataset')
+    
+    output_dir = '../results'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
+    filename = os.path.join(output_dir, f"results_{dataset_name}.csv")
+    
+    header = "Dataset,Model,CrossMode,AUROC_Node,AUPRC_Node,MacroF1_Node,Rec_at_K_Node,K_Node,AUROC_Edge,AUPRC_Edge,MacroF1_Edge,Rec_at_K_Edge,K_Edge,Time(s),Epoch_FT,LR_FT,KHop"
+
+    if not os.path.exists(filename):
+        with open(filename, 'w') as f:
+            f.write(header + '\n')
+    
+    row_data = [
+        results_dict.get('Dataset', 'N/A'),
+        results_dict.get('Model', 'N/A'),
+        results_dict.get('CrossMode', 'N/A'),
+        f"{results_dict.get('AUROC_Node_mean', 0.0):.4f}",
+        f"{results_dict.get('AUPRC_Node_mean', 0.0):.4f}",
+        f"{results_dict.get('MacroF1_Node_mean', 0.0):.4f}",
+        f"{results_dict.get('Rec_at_K_Node_mean', 0.0):.4f}",
+        int(results_dict.get('K_value_Node_mean', 0)),
+        f"{results_dict.get('AUROC_Edge_mean', 0.0):.4f}",
+        f"{results_dict.get('AUPRC_Edge_mean', 0.0):.4f}",
+        f"{results_dict.get('MacroF1_Edge_mean', 0.0):.4f}",
+        f"{results_dict.get('Rec_at_K_Edge_mean', 0.0):.4f}",
+        int(results_dict.get('K_value_Edge_mean', 0)),
+        f"{results_dict.get('Time(s)', 0.0):.2f}",
+        args.epoch_ft,
+        args.lr_ft,
+        args.khop
+    ]
+
+    with open(filename, 'a') as f:
+        f.write(','.join(map(str, row_data)) + '\n')
+    
+    print(f"结果保存到: {filename}")
 
 
 # ======================================================================

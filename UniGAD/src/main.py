@@ -1,4 +1,3 @@
-
 import time
 import numpy as np
 import pandas
@@ -6,7 +5,6 @@ import os
 import sys
 import warnings
 warnings.filterwarnings("ignore")
-
 
 from utils import *
 from pretrain_models import *
@@ -17,40 +15,28 @@ seed_list = list(range(3407, 10000, 10))
 
 def pretrain(model, train_dataloader, args):
     print("start pre-training..")
-
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.decay_step, gamma=args.decay_rate)
-    # scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=scheduler)
-
     max_epoch = args.epoch_pretrain
     epoch_iter = tqdm(range(max_epoch))
     device = args.device
-
     for epoch in epoch_iter:
         model.train()
         loss_list = []
-
         for batched_data in train_dataloader:
-            # we don't need labels for pretrain task
             batched_graph = batched_data 
             batched_graph = batched_graph.to(device)
             loss, loss_dict = model(batched_graph, batched_graph.ndata["feature"])
-
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             loss_list.append(loss.item())
-
         if scheduler is not None:
             scheduler.step()
-
         train_loss = np.mean(loss_list)
         loss_dict["lr"] = get_current_lr(optimizer)
-        
         print(f"# Epoch {epoch} \n\t train_loss: {train_loss:.4f} \n\t {loss_dict}")
-
     return model
-
 
 def work(dataset: Dataset, kernel='gcn', cross_mode='ng2ng', args=None):
     time_cost = 0
@@ -71,35 +57,22 @@ def work(dataset: Dataset, kernel='gcn', cross_mode='ng2ng', args=None):
     print(f"making the subpooling matrix")
     dataset.make_sp_matrix_graph_list(khop=hop, load_kg=(not args.force_remake_sp))
 
-    ####################### pretrain model start
     pretrain_seed = 42
     set_seed(pretrain_seed)
-    # clear gpu mem
     torch.cuda.empty_cache()
 
-    # build pretrain model
     in_dim = dataset.in_dim
     if args.pretrain_model == 'graphmae':
-        pretrain_model = GraphMAE(
-            in_dim=in_dim, 
-            hid_dim=args.hid_dim, 
-            num_layer=args.num_layer_pretrain,  
-            drop_ratio=args.dropout,
-            act=args.act, 
-            norm=args.norm, 
-            residual=args.residual,
-            mask_ratio=args.mask_ratio,
-            encoder_type=encoder_type,
-            decoder_type=decoder_type,
-            replace_ratio=args.replace_ratio,
-        ).to(args.device)
+        pretrain_model = GraphMAE(in_dim=in_dim, hid_dim=args.hid_dim, num_layer=args.num_layer_pretrain,  
+                                  drop_ratio=args.dropout, act=args.act, norm=args.norm, residual=args.residual,
+                                  mask_ratio=args.mask_ratio, encoder_type=encoder_type, decoder_type=decoder_type,
+                                  replace_ratio=args.replace_ratio).to(args.device)
     else:
-        raise NotImplementedError # FIXME: only graphme now
+        raise NotImplementedError
     
     full_model_name += '-' + decoder_type
     model_path = f"../pretrained_models/{full_model_name}_{dataset_name}_{args.epoch_pretrain}.pt"
     if args.load_model == "":
-        # pretrain model from scratch
         print(pretrain_model)
         pretrain_dataloader = dataset.get_pretrain_dataloaders(args.batch_size)
         pretrain_model = pretrain(pretrain_model, pretrain_dataloader, args)
@@ -110,19 +83,13 @@ def work(dataset: Dataset, kernel='gcn', cross_mode='ng2ng', args=None):
         del pretrain_dataloader
     else:
         pretrain_model.load_state_dict(torch.load(model_path))
-    # clear gpu mem
-    torch.cuda.empty_cache()
-    #######################  pretrina model end
-
-    # multiple trials
     
-    # result list: AUC, PRC, Macro-F1
+    torch.cuda.empty_cache()
+
     result_score_dict_list = []
     for t in range(args.trials):
         print("Dataset {}, Model {}, Trial {}".format(dataset_name, full_model_name, t))
-        # reload the state_dict
         pretrain_model.load_state_dict(torch.load(model_path))
-        # set seed
         seed = seed_list[t]
         set_seed(seed)
         train_dataloader, val_dataloader, test_dataloader = dataset.get_graph_and_sp_dataloaders(args.batch_size, trial_id=t)
@@ -131,35 +98,34 @@ def work(dataset: Dataset, kernel='gcn', cross_mode='ng2ng', args=None):
         print(f"training...")
         score_test = e2e_model.train()
         result_score_dict_list.append(score_test)
-
         ED = time.time()
         time_cost += ED - ST
     
+    model_result = {
+        'Dataset': dataset_name,
+        'Model': full_model_name,
+        'CrossMode': cross_mode,
+        'Time(s)': time_cost / args.trials
+    }
+
+    for level_key, metrics_dict in result_score_dict_list[0].items(): # Assuming all trials have same keys
+        level_name = NAME_MAP.get(level_key, 'Unknown')
+        for metric_name in metrics_dict.keys():
+            metric_result_list = [d[level_key][metric_name] for d in result_score_dict_list]
+            model_result[f'{metric_name}_{level_name}_mean'] = np.mean(metric_result_list)
+            model_result[f'{metric_name}_{level_name}_std'] = np.std(metric_result_list)
+
+
+    save_results_to_csv(model_result, args)
     
-    model_result = {'dataset name': dataset_name,
-                    'model_name': full_model_name,
-                    'cross mode': cross_mode,
-                    'time cost': time_cost/args.trials}
-
-    # calculate the results across trials
-    for k in e2e_model.output_route:
-        for metric in ['MacroF1', 'AUROC', 'AUPRC']:
-            metric_result_list = [d[k][metric] for d in result_score_dict_list]
-            model_result[f'{metric} {NAME_MAP[k]} mean'] = np.mean(metric_result_list)
-            model_result[f'{metric} {NAME_MAP[k]} std'] = np.std(metric_result_list)
-            print(metric)
-            print(metric_result_list)
-            print("avg: ", sum(metric_result_list)/len(metric_result_list))
-
-    # save the result to 
-    model_result = pandas.DataFrame(model_result, index=[0])
-    return model_result
-
-
+    print("--- Experiment Summary ---")
+    print(pd.DataFrame([model_result]))
+    print("--------------------------")
+    
+    return pd.DataFrame([model_result])
 
 def main():
     args = get_args()
-    # parse data
     if args.kernels is not None:
         kernels = args.kernels.split(',')
         print('All kernels: ', kernels)
@@ -183,13 +149,9 @@ def main():
     else:
         raise NotImplementedError
 
-    # evaluate all parameters
     for dataset_name in dataset_names:
-        # parse dataset
-        # dataset_name = DATASETS[dataset_id]
         print('Evaluating dataset: ', dataset_name)
-
-        ### settings
+        
         # load dataset 
         if dataset_name == 'uni-tsocial' \
             or dataset_name == 'mnist/dgl/mnist0' \
@@ -213,24 +175,17 @@ def main():
             dataset = Dataset(dataset_name+'-els', prefix='../datasets/edge_labels/', sp_type=sp_type, labels_have='ne')
         else:
             dataset = Dataset(dataset_name)
-        # metrics to save
-        columns = ['name']
-        results = pandas.DataFrame(columns=columns)
+
+        results_df = pd.DataFrame()
         
         for kernel in kernels:
-            # parse pre-train model and encoder name
-            print('Evaluating model: ', args.pretrain_model + kernel)
-            # iterate over all cross modes
+            print('Evaluating model: ', args.pretrain_model + '-' + kernel)
             for cross_mode in cross_modes:
-                # work
-                model_result = work(dataset, kernel, cross_mode, args)
-                results = pandas.concat([results, model_result])
-
-            # save result for each dataset-model-pair
-            full_model_name = args.pretrain_model + '-' + kernel
-            save_file_name = f"{args.tag}.{args.act_ft}.dataset_{dataset_name}.premodel_{full_model_name}.preepochs_{args.epoch_pretrain}.hop_{args.khop}.sp_type_{sp_type}.lr_ft_{args.lr_ft}.epochft_{args.epoch_ft}.wd_{args.l2}.crossmode_{cross_mode}.mlplayers_{args.stitch_mlp_layers}_{args.final_mlp_layers}.lossweights_{str(args.node_loss_weight)+'-'+str(args.edge_loss_weight)+'-'+str(args.graph_loss_weight)}"
-            save_results(results, save_file_name)
-            print(results)
+                model_result_df = work(dataset, kernel, cross_mode, args)
+                results_df = pd.concat([results_df, model_result_df], ignore_index=True)
+        
+        print(f"--- All results for dataset {dataset_name} ---")
+        print(results_df)
 
 if __name__ == "__main__":
     main()
