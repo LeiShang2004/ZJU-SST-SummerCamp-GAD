@@ -106,7 +106,7 @@ python main.py --datasets 1 --pretrain_model graphmae --kernels bwgnn,gcn --lr 5
 
 - **TF-GAD 结果**: 存储在 `TF-GAD/` 目录下的 `results_zju.csv` 和 `results_paper.csv` 中。（下图为部分结果）
 
-![](figure/tfgad1.jpg)
+![](figure/tfgad-zju.jpg)
 
 - **GADAM 结果**: 存储在 `GADAM/results/` 目录下，每个数据集一个文件，并提供了一个合并脚本 `merge.py`。
 
@@ -123,5 +123,5 @@ python main.py --datasets 1 --pretrain_model graphmae --kernels bwgnn,gcn --lr 5
 - **UniGAD**: [https://github.com/YingtongLai/UniGAD](https://www.google.com/search?q=https://github.com/YingtongLai/UniGAD)
 - **GraphMAE**: https://github.com/THUDM/GraphMAE
 - **GADBench**: https://github.com/squareRoot3/GADBench/
-- **GADAM**:https://github.com/PasaLab/GADAM
+- **GADAM**: https://github.com/PasaLab/GADAM
 - 以及 **GLocalKD, iGAD, GmapAD, RQGNN, GraphPrompt** 等论文的开源代码，详细列表见 `UniGAD/README.MD`。
