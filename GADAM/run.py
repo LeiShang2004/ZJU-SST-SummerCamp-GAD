@@ -11,7 +11,6 @@ import csv
 import os
 from datetime import datetime
 
-# ... [train_local, load_info_from_local, train_global 函数与上一版相同，这里省略以保持简洁] ...
 def train_local(net, graph, feats, opt, args, init=True):
     memo = {}
     labels = graph.ndata['label']
@@ -228,15 +227,9 @@ def main(args):
     t_all = t2+t4-t1-t3
     print('mean_t:{:.4f}'.format(t_all / (args.local_epochs + args.global_epochs)))
 
-    # ------------------------------------------------------------------
-    # 【修改】将结果保存到 ./results/ 文件夹下
-    # ------------------------------------------------------------------
-    # 1. 定义结果文件夹路径
     results_dir = 'results'
-    # 2. 确保文件夹存在
     os.makedirs(results_dir, exist_ok=True)
-    
-    # 3. 构建包含文件夹路径的完整文件名
+
     csv_file_path = os.path.join(results_dir, f'results_gadam_{args.data}.csv')
     
     header = [

@@ -87,6 +87,7 @@ GADAM/data
 *.h5
 *.weights
 *.onnx
+*.pkl
 
 # 训练日志和输出目录
 logs/
