@@ -106,15 +106,15 @@ python main.py --datasets 1 --pretrain_model graphmae --kernels bwgnn,gcn --lr 5
 
 - **TF-GAD 结果**: 存储在 `TF-GAD/` 目录下的 `results_zju.csv` 和 `results_paper.csv` 中。（下图为部分结果）
 
-![](figure\tfgad1.jpg)
+![](figure/tfgad1.jpg)
 
 - **GADAM 结果**: 存储在 `GADAM/results/` 目录下，每个数据集一个文件，并提供了一个合并脚本 `merge.py`。
 
-![](C:\Users\sheng\Desktop\新建文件夹\figure\gadam.jpg)
+![](figure/gadam.jpg)
 
 - **UniGAD 结果**: 运行 `main.py` 后，结果会保存在 `UniGAD/results/` 目录下，以数据集命名，并提供了一个合并脚本 `merge.py`。
 
-![](figure\unigad.jpg)
+![](figure/unigad.jpg)
 
 ## 7. 引用与参考
 
